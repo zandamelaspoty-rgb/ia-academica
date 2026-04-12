@@ -135,7 +135,7 @@ app.post("/api/chat", async (req, res) => {
       profile.plan === "premium" &&
       (!profile.premium_expires_at || new Date(profile.premium_expires_at) > new Date());
 
-    const dailyLimit = isPremium ? 100 : profile.daily_limit || 3;
+    const dailyLimit = isPremium ? 15 : profile.daily_limit || 3;
 
     if (usageToday >= dailyLimit) {
       return res.status(403).json({

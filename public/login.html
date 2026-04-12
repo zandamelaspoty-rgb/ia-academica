@@ -70,6 +70,11 @@
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+    const existingToken = localStorage.getItem('lm_access_token');
+    if (existingToken) {
+      window.location.href = '/';
+    }
+
     document.getElementById('signupBtn').addEventListener('click', async () => {
       msg.textContent = 'Criando conta...';
 
@@ -84,14 +89,14 @@
           return;
         }
 
-       const { data, error } = await supabase.auth.signUp({
-  email,
-  password,
-  options: {
-    data: { full_name, phone },
-    emailRedirectTo: 'https://ia-academica-1.onrender.com/login.html'
-  }
-});
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name, phone },
+            emailRedirectTo: 'https://ia-academica-1.onrender.com/login.html'
+          }
+        });
 
         if (error) {
           msg.textContent = 'Erro ao criar conta: ' + error.message;

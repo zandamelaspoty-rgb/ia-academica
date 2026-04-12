@@ -185,3 +185,38 @@ body {
     width: 100%;
   }
 }
+
+.lm-user-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.lm-logout-btn {
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.05);
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lm-logout-btn:hover {
+  border-color: rgba(0,229,255,0.25);
+  color: #8cefff;
+}
+
+@media (max-width: 640px) {
+  .lm-user-top {
+    align-items: stretch;
+  }
+
+  .lm-logout-btn {
+    width: 100%;
+  }
+}

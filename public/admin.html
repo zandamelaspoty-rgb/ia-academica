@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Premium | LM TECH 93</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #07111f 0%, #0b1728 100%);
+      color: #eaf7ff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: rgba(10, 18, 30, 0.86);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.28);
+    }
+    h1 { margin: 0; }
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #00e5ff, #00b8ff);
+      color: #03131a;
+    }
+    .btn-danger {
+      background: #ff5f6d;
+      color: #fff;
+    }
+    .btn-soft {
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .msg {
+      margin: 12px 0 18px;
+      color: #9ec5d9;
+      white-space: pre-wrap;
+    }
+    .user-list {
+      display: grid;
+      gap: 14px;
+    }
+    .user-item {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .user-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .user-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .meta {
+      font-size: 14px;
+      color: #b7d0de;
+      line-height: 1.7;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .badge-free {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #eaf7ff;
+    }
+    .badge-premium {
+      background: rgba(0,229,255,0.14);
+      border: 1px solid rgba(0,229,255,0.25);
+      color: #8cefff;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <h1>Painel Admin Premium</h1>
+      <button id="logoutBtn" class="btn-soft" type="button">Sair</button>
+    </div>
+
+    <div class="card">
+      <div id="msg" class="msg">A carregar usuários...</div>
+      <div id="userList" class="user-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const msg = document.getElementById("msg");
+    const userList = document.getElementById("userList");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    function getToken() {
+      return localStorage.getItem("lm_access_token");
+    }
+
+    function clearSession() {
+      localStorage.removeItem("lm_access_token");
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return "Sem data";
+      const d = new Date(dateString);
+      return isNaN(d.getTime()) ? "Sem data" : d.toLocaleString("pt-PT");
+    }
+
+    async function api(path, method = "GET", body = null) {
+      const token = getToken();
+      const response = await fetch(path, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: body ? JSON.stringify(body) : null
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Erro na requisição");
+      }
+      return data;
+    }
+
+    async function loadUsers() {
+      try {
+        msg.textContent = "A carregar usuários...";
+        const data = await api("/api/admin/users");
+        renderUsers(data.users || []);
+        msg.textContent = `Total de usuários: ${data.users.length}`;
+      } catch (error) {
+        msg.textContent = error.message;
+      }
+    }
+
+    function renderUsers(users) {
+      userList.innerHTML = "";
+
+      users.forEach((user) => {
+        const item = document.createElement("div");
+        item.className = "user-item";
+
+        const badgeClass = user.plan === "premium" ? "badge-premium" : "badge-free";
+
+        item.innerHTML = `
+          <div class="user-head">
+            <div>
+              <div class="user-name">${user.full_name || "Sem nome"}</div>
+              <div class="meta">
+                Telefone: ${user.phone || "Sem telefone"}<br>
+                Plano: <span class="badge ${badgeClass}">${user.plan.toUpperCase()}</span><br>
+                Limite diário: ${user.daily_limit}<br>
+                Premium até: ${formatDate(user.premium_expires_at)}
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-primary" data-action="premium-30" data-id="${user.id}">Ativar 30 dias</button>
+            <button class="btn-primary" data-action="premium-7" data-id="${user.id}">Ativar 7 dias</button>
+            <button class="btn-soft" data-action="renew-30" data-id="${user.id}">Renovar +30 dias</button>
+            <button class="btn-danger" data-action="remove" data-id="${user.id}">Remover Premium</button>
+          </div>
+        `;
+
+        userList.appendChild(item);
+      });
+
+      bindButtons();
+    }
+
+    function bindButtons() {
+      document.querySelectorAll("[data-action]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const action = btn.getAttribute("data-action");
+          const userId = btn.getAttribute("data-id");
+
+          try {
+            msg.textContent = "A processar...";
+
+            if (action === "premium-30") {
+              await api("/api/admin/set-premium", "POST", { user_id: userId, days: 30 });
+              msg.textContent = "Premium ativado por 30 dias.";
+            }
+
+            if (action === "premium-7") {
+              await api("/api/admin/set-premium", "POST", { user_id: userId, days: 7 });
+              msg.textContent = "Premium ativado por 7 dias.";
+            }
+
+            if (action === "renew-30") {
+              await api("/api/admin/renew-premium", "POST", { user_id: userId, days: 30 });
+              msg.textContent = "Premium renovado por 30 dias.";
+            }
+
+            if (action === "remove") {
+              await api("/api/admin/remove-premium", "POST", { user_id: userId });
+              msg.textContent = "Premium removido.";
+            }
+
+            await loadUsers();
+          } catch (error) {
+            msg.textContent = error.message;
+          }
+        });
+      });
+    }
+
+    logoutBtn.addEventListener("click", () => {
+      clearSession();
+      window.location.href = "/login.html";
+    });
+
+    if (!getToken()) {
+      window.location.href = "/login.html";
+    } else {
+      loadUsers();
+    }
+  </script>
+</body>
+</html>

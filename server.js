@@ -60,6 +60,35 @@ async function getTodayUsage(userId) {
   return data.reduce((sum, row) => sum + row.message_count, 0);
 }
 
+function isAdmin(user) {
+  return user?.email === process.env.ADMIN_EMAIL;
+}
+
+async function ensureAdminFromRequest(req, res) {
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.replace("Bearer ", "").trim();
+
+  if (!token) {
+    res.status(401).json({ error: "Sem sessão." });
+    return null;
+  }
+
+  const user = await getUserFromToken(token);
+
+  if (!user) {
+    res.status(401).json({ error: "Sessão inválida." });
+    return null;
+  }
+
+  if (!isAdmin(user)) {
+    res.status(403).json({ error: "Acesso negado." });
+    return null;
+  }
+
+  return user;
+}
+
+
 async function addUsage(userId) {
   const { error } = await supabaseAdmin
     .from("usage_logs")
@@ -166,6 +195,145 @@ app.get("/api/me", async (req, res) => {
         usage_today: usageToday
       }
     });
+  } catch (error) {
+    res.status(500).json({ error: "Erro interno." });
+  }
+});
+
+app.get("/api/admin/users", async (req, res) => {
+  try {
+    const adminUser = await ensureAdminFromRequest(req, res);
+    if (!adminUser) return;
+
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name, phone, plan, daily_limit, premium_expires_at, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ users: data });
+  } catch (error) {
+    res.status(500).json({ error: "Erro interno." });
+  }
+});
+
+app.post("/api/admin/set-premium", async (req, res) => {
+  try {
+    const adminUser = await ensureAdminFromRequest(req, res);
+    if (!adminUser) return;
+
+    const { user_id, days = 30 } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({ error: "user_id é obrigatório." });
+    }
+
+    const expires = new Date();
+    expires.setDate(expires.getDate() + Number(days));
+
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        plan: "premium",
+        daily_limit: 100,
+        premium_expires_at: expires.toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", user_id);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.json({
+      success: true,
+      premium_expires_at: expires.toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Erro interno." });
+  }
+});
+
+app.post("/api/admin/renew-premium", async (req, res) => {
+  try {
+    const adminUser = await ensureAdminFromRequest(req, res);
+    if (!adminUser) return;
+
+    const { user_id, days = 30 } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({ error: "user_id é obrigatório." });
+    }
+
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .select("premium_expires_at")
+      .eq("id", user_id)
+      .single();
+
+    if (profileError || !profile) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    const baseDate =
+      profile.premium_expires_at && new Date(profile.premium_expires_at) > new Date()
+        ? new Date(profile.premium_expires_at)
+        : new Date();
+
+    baseDate.setDate(baseDate.getDate() + Number(days));
+
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        plan: "premium",
+        daily_limit: 100,
+        premium_expires_at: baseDate.toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", user_id);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.json({
+      success: true,
+      premium_expires_at: baseDate.toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Erro interno." });
+  }
+});
+
+app.post("/api/admin/remove-premium", async (req, res) => {
+  try {
+    const adminUser = await ensureAdminFromRequest(req, res);
+    if (!adminUser) return;
+
+    const { user_id } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({ error: "user_id é obrigatório." });
+    }
+
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        plan: "free",
+        daily_limit: 3,
+        premium_expires_at: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", user_id);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: "Erro interno." });
   }

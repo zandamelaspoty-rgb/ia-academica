@@ -360,3 +360,281 @@ body {
     padding-bottom: 90px;
   }
 }
+
+.lm-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lm-premium-top-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00e5ff, #00b8ff);
+  color: #03131a;
+  box-shadow: 0 10px 24px rgba(0, 184, 255, 0.18);
+}
+
+.lm-premium-top-btn:hover {
+  transform: translateY(-1px);
+}
+
+.lm-premium-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at left top, rgba(0,229,255,0.10), transparent 35%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border: 1px solid rgba(0,229,255,0.10);
+}
+
+.lm-premium-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lm-premium-banner-text strong {
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.lm-premium-banner-text span {
+  font-size: 14px;
+  color: #b8d1df;
+  line-height: 1.6;
+}
+
+.lm-premium-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-weight: 800;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #ffffff;
+}
+
+.lm-premium-banner-btn:hover {
+  border-color: rgba(0,229,255,0.25);
+  color: #8cefff;
+}
+
+.lm-upgrade-box {
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 209, 102, 0.10), transparent 35%),
+    rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 209, 102, 0.18);
+}
+
+.lm-upgrade-title {
+  color: #ffe0a8;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.lm-upgrade-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00e5ff, #00b8ff);
+  color: #03131a;
+}
+
+@media (max-width: 768px) {
+  .lm-premium-banner,
+  .lm-user-actions {
+    align-items: stretch;
+  }
+
+  .lm-premium-banner-btn,
+  .lm-premium-top-btn,
+  .lm-logout-btn {
+    width: 100%;
+  }
+}
+
+.lm-offer-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 209, 102, 0.10), transparent 35%),
+    rgba(255,255,255,0.04);
+  border: 1px solid rgba(255, 209, 102, 0.16);
+}
+
+.lm-offer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.lm-offer-text strong {
+  color: #fff0c7;
+  font-size: 16px;
+}
+
+.lm-offer-text span {
+  color: #c8d8e2;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.lm-offer-timer {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lm-time-card {
+  min-width: 66px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  text-align: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.lm-time-card span {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.lm-time-card small {
+  color: #9ec0d3;
+  font-size: 12px;
+}
+
+.lm-plans-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.lm-plan-card {
+  position: relative;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.lm-plan-card h3 {
+  margin: 0 0 14px;
+  color: #ffffff;
+  font-size: 22px;
+}
+
+.lm-plan-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #c0d8e5;
+  line-height: 1.9;
+}
+
+.lm-plan-card-premium {
+  border-color: rgba(0,229,255,0.18);
+  box-shadow: 0 14px 30px rgba(0,229,255,0.08);
+}
+
+.lm-plan-tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,229,255,0.14);
+  color: #8cefff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.lm-plan-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00e5ff, #00b8ff);
+  color: #03131a;
+}
+
+.lm-social-proof {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 18px 0 6px;
+}
+
+.lm-proof-item {
+  padding: 16px;
+  border-radius: 18px;
+  text-align: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.lm-proof-item strong {
+  display: block;
+  font-size: 26px;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.lm-proof-item span {
+  color: #b7d0de;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .lm-plans-compare,
+  .lm-social-proof {
+    grid-template-columns: 1fr;
+  }
+
+  .lm-offer-timer {
+    width: 100%;
+  }
+
+  .lm-time-card {
+    flex: 1;
+    min-width: 0;
+  }
+}

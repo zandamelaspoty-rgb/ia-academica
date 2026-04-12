@@ -238,7 +238,7 @@ app.post("/api/admin/set-premium", async (req, res) => {
       .from("profiles")
       .update({
         plan: "premium",
-        daily_limit: 100,
+        daily_limit: 15,
         premium_expires_at: expires.toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -289,7 +289,7 @@ app.post("/api/admin/renew-premium", async (req, res) => {
       .from("profiles")
       .update({
         plan: "premium",
-        daily_limit: 100,
+        daily_limit: 15,
         premium_expires_at: baseDate.toISOString(),
         updated_at: new Date().toISOString()
       })

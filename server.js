@@ -1,5 +1,8 @@
 import multer from "multer";
-import pdf from "pdf-parse";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+const pdf = require("pdf-parse");
 import express from "express";
 import dotenv from "dotenv";
 import OpenAI from "openai";

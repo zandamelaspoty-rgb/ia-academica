@@ -450,5 +450,90 @@ Use linguagem simples e profissional.
     });
   }
 });
+
+// ================== WHATSAPP BOT ==================
+
+app.get("/webhook", (req, res) => {
+  const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    return res.status(200).send(challenge);
+  }
+
+  res.sendStatus(403);
+});
+
+app.post("/webhook", async (req, res) => {
+  try {
+    const msg = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+
+    if (!msg || !msg.text) return res.sendStatus(200);
+
+    const phone = msg.from;
+    const text = msg.text.body;
+
+    // 🔥 SALVAR CLIENTE
+    await supabaseAdmin.from("bot_clients").upsert({
+      phone,
+      last_message: text,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "phone" });
+
+    // 🔥 IA VENDEDORA
+    const ai = await openai.responses.create({
+      model: "gpt-5.4-mini",
+      input: [
+        {
+          role: "system",
+          content: `
+Você é um vendedor automático no WhatsApp.
+
+Objetivo:
+- Convencer o cliente
+- Responder simples
+- Levar para compra
+
+Planos:
+Bot básico: 3000 MT
+IA premium: 8000 MT
+
+Sempre tente vender.
+Nunca diga que é IA.
+          `
+        },
+        {
+          role: "user",
+          content: text
+        }
+      ]
+    });
+
+    const reply = ai.output_text || "Posso te ajudar a automatizar seu negócio.";
+
+    // 🔥 ENVIAR WHATSAPP
+    await fetch(`https://graph.facebook.com/v18.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.WHATSAPP_TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: phone,
+        text: { body: reply }
+      })
+    });
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(200);
+  }
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Servidor em http://localhost:${port}`));

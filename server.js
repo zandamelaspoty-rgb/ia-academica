@@ -478,5 +478,44 @@ app.post("/api/save-lead", async (req, res) => {
   }
 });
 
+
+app.post("/api/ia-vendedora", async (req, res) => {
+  try {
+    const { mensagem, nome, tipo_negocio, objetivo } = req.body;
+
+    const ai = await openai.responses.create({
+      model: "gpt-4o-mini",
+      input: `
+Você é um vendedor profissional da LM TECH 93.
+
+Cliente: ${nome || "Cliente"}
+Negócio: ${tipo_negocio || "não informado"}
+Objetivo: ${objetivo || "não informado"}
+
+Mensagem do cliente:
+${mensagem || ""}
+
+Responda curto, simpático e sempre leve para venda.
+Ofereça:
+- Bot básico: 3000 MT setup + 1000 MT/mês
+- IA vendedora: 8000 MT setup + 3000 MT/mês
+
+Termine com uma pergunta para fechar a venda.
+`
+    });
+
+    res.json({
+      success: true,
+      reply: ai.output_text || "Posso te ajudar a automatizar teu negócio hoje."
+    });
+  } catch (err) {
+    console.error("Erro IA vendedora:", err);
+    res.status(500).json({
+      success: false,
+      reply: "Posso te ajudar a automatizar teu negócio hoje."
+    });
+  }
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Servidor em http://localhost:${port}`));

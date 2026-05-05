@@ -481,45 +481,15 @@ app.post("/api/save-lead", async (req, res) => {
 
 app.post("/api/ia-vendedora", async (req, res) => {
   try {
-    const { mensagem, nome, tipo_negocio, objetivo } = req.body;
-
-    const ai = await openai.responses.create({
-      model: "gpt-4o-mini",
-      input: `
-Você é uma IA vendedora profissional da LM TECH 93 no WhatsApp.
-
-Cliente: ${nome || "Cliente"}
-Negócio: ${tipo_negocio || "não informado"}
-Objetivo: ${objetivo || "não informado"}
-
-Mensagem do cliente:
-${mensagem || ""}
-
-Regras:
-- Responda de forma natural, curta e humana.
-- NÃO repita sempre "o que queres saber agora".
-- NÃO faça sempre a mesma pergunta.
-- Se o cliente perguntar algo, responda diretamente.
-- Só apresente preços quando fizer sentido.
-- Conduza a conversa para venda sem parecer robô.
-
-Ofertas:
-- Bot básico: 3000 MT setup + 1000 MT/mês
-- IA vendedora: 8000 MT setup + 3000 MT/mês
-
-No final, faça apenas UMA pergunta útil para avançar a conversa.
-`
-    });
-
     res.json({
       success: true,
-      reply: ai.output_text || "Posso te ajudar a automatizar teu negócio hoje."
+      reply: "TESTE OK FUNCIONANDO 🔥"
     });
   } catch (err) {
-    console.error("Erro IA vendedora:", err);
-    res.status(500).json({
+    console.error("Erro IA:", err);
+    res.json({
       success: false,
-      reply: "Posso te ajudar a automatizar teu negócio hoje."
+      reply: "ERRO IA"
     });
   }
 });

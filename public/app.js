@@ -10,19 +10,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function addMessage(text, type) {
     if (!chatBox) return;
+
     const msg = document.createElement("div");
     msg.className = `lm-msg ${type === "user" ? "lm-msg-user" : "lm-msg-ai"}`;
-    msg.textContent = text;
+
+    if (type === "ai") {
+      msg.innerHTML = "🛡️ <strong>Cyber AI:</strong><br><br>" + text;
+    } else {
+      msg.textContent = text;
+    }
+
     chatBox.appendChild(msg);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
   function setLoading() {
     if (!chatBox) return;
+
     const loading = document.createElement("div");
     loading.className = "lm-msg lm-msg-ai";
     loading.id = "lm-loading";
-    loading.textContent = "A pensar...";
+    loading.textContent = "🛡️ Cyber AI a analisar...";
     chatBox.appendChild(loading);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
@@ -40,15 +48,15 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("lm_access_token");
   }
 
-  function lockChat(limitMessage = "Limite grátis atingido. Ativa o premium ou volta amanhã.") {
+  function lockChat(limitMessage = "🔒 Limite gratuito atingido. Ativa o Cyber Premium para continuar a aprender Cibersegurança.") {
     if (userInput) {
       userInput.disabled = true;
-      userInput.placeholder = "Limite diário atingido.";
+      userInput.placeholder = "🔒 Limite diário atingido. Ativa o Cyber Premium.";
     }
 
     if (submitButton) {
       submitButton.disabled = true;
-      submitButton.textContent = "Limite atingido";
+      submitButton.textContent = "🔒 Limite atingido";
     }
 
     if (chatForm && !document.getElementById("lm-upgrade-box")) {
@@ -57,8 +65,8 @@ document.addEventListener("DOMContentLoaded", () => {
       box.className = "lm-upgrade-box";
       box.innerHTML = `
         <div class="lm-upgrade-title">⚠️ ${limitMessage}</div>
-        <a href="https://wa.me/258861532479" target="_blank" class="lm-upgrade-link">
-          💬 Ativar Premium
+        <a href="https://wa.me/258861532479?text=Ol%C3%A1%2C%20quero%20ativar%20o%20Cyber%20Premium%20da%20Cyber%20AI%20LM%20TECH%2093." target="_blank" class="lm-upgrade-link">
+          🛡️ Ativar Cyber Premium
         </a>
       `;
       chatForm.appendChild(box);
@@ -68,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function unlockChat() {
     if (userInput) {
       userInput.disabled = false;
-      userInput.placeholder = "Escreve a tua dúvida acadêmica...";
+      userInput.placeholder = "Pergunte sobre redes, phishing, segurança digital ou Cibersegurança...";
     }
 
     if (submitButton) {
@@ -130,10 +138,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const used = u.usage_today || 0;
       const percent = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
 
-      statusBox.textContent = isPremium ? "Conta premium ativa." : "Conta grátis ativa.";
+      statusBox.textContent = isPremium
+        ? "🟢 Cyber Premium ativo."
+        : "🛡️ Modo básico ativo.";
 
       if (planBadge) {
-        planBadge.textContent = isPremium ? "PREMIUM" : "FREE";
+        planBadge.textContent = isPremium ? "CYBER PREMIUM" : "FREE";
         planBadge.classList.remove("lm-plan-free", "lm-plan-premium");
         planBadge.classList.add(isPremium ? "lm-plan-premium" : "lm-plan-free");
       }
@@ -147,10 +157,10 @@ document.addEventListener("DOMContentLoaded", () => {
         usageAlert.classList.remove("warn", "danger");
 
         if (percent >= 100) {
-          usageAlert.textContent = "Limite atingido";
+          usageAlert.textContent = "🔒 Limite atingido";
           usageAlert.classList.add("danger");
         } else if (percent >= 80) {
-          usageAlert.textContent = "Perto do limite";
+          usageAlert.textContent = "⚠️ Perto do limite";
           usageAlert.classList.add("warn");
         }
       }
@@ -167,13 +177,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (used >= limit) {
-        lockChat("Limite diário atingido. Ativa o premium ou volta amanhã.");
+        lockChat("🔒 Limite diário atingido. Ativa o Cyber Premium para continuar a aprender Cibersegurança.");
       } else {
         unlockChat();
       }
     } catch (error) {
       console.error("Erro ao carregar status:", error);
-      statusBox.textContent = "Erro ao carregar conta.";
+      statusBox.textContent = "❌ Erro ao carregar conta Cyber AI.";
     }
   }
 
@@ -186,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!pdfInput || !pdfInput.files || !pdfInput.files[0]) {
-      addMessage("Seleciona um PDF primeiro.", "ai");
+      addMessage("📄 Selecione um material PDF primeiro.", "ai");
       return;
     }
 
@@ -196,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (pdfSummaryBtn) {
       pdfSummaryBtn.disabled = true;
-      pdfSummaryBtn.textContent = "A resumir PDF...";
+      pdfSummaryBtn.textContent = "🛡️ A analisar material...";
     }
 
     setLoading();
@@ -214,33 +224,35 @@ document.addEventListener("DOMContentLoaded", () => {
       removeLoading();
 
       if (!response.ok) {
-        addMessage(data.error || "Erro ao resumir PDF.", "ai");
+        addMessage(data.error || "❌ Erro ao analisar o material PDF.", "ai");
+
         if (pdfSummaryBtn) {
           pdfSummaryBtn.disabled = false;
-          pdfSummaryBtn.textContent = "Resumir PDF";
+          pdfSummaryBtn.textContent = "Analisar Material";
         }
+
         return;
       }
 
-      addMessage("Resumo do PDF:", "ai");
-      addMessage(data.reply || "Sem resumo disponível.", "ai");
+      addMessage("🛡️ Análise do material:", "ai");
+      addMessage(data.reply || "Sem análise disponível.", "ai");
 
       pdfInput.value = "";
 
       if (pdfSummaryBtn) {
         pdfSummaryBtn.disabled = false;
-        pdfSummaryBtn.textContent = "Resumir PDF";
+        pdfSummaryBtn.textContent = "Analisar Material";
       }
 
       await loadUserStatus();
     } catch (error) {
       console.error("Erro ao enviar PDF:", error);
       removeLoading();
-      addMessage("Erro ao enviar PDF.", "ai");
+      addMessage("❌ Erro ao enviar material PDF.", "ai");
 
       if (pdfSummaryBtn) {
         pdfSummaryBtn.disabled = false;
-        pdfSummaryBtn.textContent = "Resumir PDF";
+        pdfSummaryBtn.textContent = "Analisar Material";
       }
     }
   }
@@ -257,12 +269,14 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
 
       const token = getToken();
+
       if (!token) {
         window.location.href = "/login.html";
         return;
       }
 
       const message = userInput?.value.trim();
+
       if (!message || userInput?.disabled) return;
 
       addMessage(message, "user");
@@ -283,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
         removeLoading();
 
         if (!response.ok) {
-          const errorText = data.error || "Erro ao comunicar com a IA.";
+          const errorText = data.error || "❌ Erro ao comunicar com a Cyber AI.";
           addMessage(errorText, "ai");
 
           if (response.status === 401) {
@@ -302,12 +316,13 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        addMessage(data.reply || "Sem resposta no momento.", "ai");
+        addMessage(data.reply || "🛡️ Cyber AI sem resposta no momento.", "ai");
         await loadUserStatus();
+
       } catch (error) {
         console.error("Erro no envio:", error);
         removeLoading();
-        addMessage("Erro de ligação com o servidor.", "ai");
+        addMessage("❌ Erro de ligação com o servidor da Cyber AI.", "ai");
       }
     });
   }
@@ -316,5 +331,57 @@ document.addEventListener("DOMContentLoaded", () => {
     pdfSummaryBtn.addEventListener("click", handlePdfSummary);
   }
 
-  loadUserStatus();
+ async function gerarCertificadoCyber() {
+  const token = localStorage.getItem("lm_access_token");
+
+  if (!token) {
+    alert("Precisas entrar primeiro.");
+    window.location.href = "/login.html";
+    return;
+  }
+
+  const nome = prompt("Digite teu nome completo:");
+
+  if (!nome) {
+    alert("Digite o nome para o certificado.");
+    return;
+  }
+
+  const progress = Number(localStorage.getItem("cyber_progress") || 0);
+
+  const response = await fetch("/api/generate-certificate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      student_name: nome,
+      progress
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    alert(data.error || "Não foi possível gerar certificado.");
+    return;
+  }
+
+  alert("🎓 Certificado liberado com sucesso!");
+}
+
+window.gerarCertificadoCyber = gerarCertificadoCyber;
+
+function atualizarCertificado() {
+  const progress = Number(localStorage.getItem("cyber_progress") || 0);
+  const area = document.getElementById("certificateArea");
+
+  if (!area) return;
+
+  area.style.display = progress >= 100 ? "block" : "none";
+}
+
+atualizarCertificado();
+loadUserStatus();
 });

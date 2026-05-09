@@ -662,10 +662,9 @@ app.post("/api/generate-certificate", async (req, res) => {
 
 app.post("/api/text-tools", async (req, res) => {
   try {
-
     const { tipo, texto } = req.body;
 
-    if (!texto || !tipo) {
+    if (!tipo || !texto) {
       return res.status(400).json({
         erro: "Texto ou tipo não enviado."
       });
@@ -681,82 +680,119 @@ app.post("/api/text-tools", async (req, res) => {
 
     let promptSistema = "";
 
-    /* CORRETOR */
     if (tipo === "corrigir") {
-
       promptSistema = `
 Você é um corretor gramatical profissional da LM TECH 93.
-
-Corrija:
-- gramática
-- ortografia
-- pontuação
-- clareza
-- concordância
-
-Mantenha o sentido original do texto.
-
+Corrija gramática, ortografia, pontuação, clareza e concordância.
+Mantenha o sentido original.
 Responda apenas com o texto corrigido.
 `;
-
-    }
-
-    /* HUMANIZADOR */
-    else if (tipo === "humanizar") {
-
+    } else if (tipo === "humanizar") {
       promptSistema = `
 Você é um humanizador de texto profissional da LM TECH 93.
-
-Reescreva o texto:
-- mais natural
-- mais humano
-- menos robótico
-- mais fluido
-- mais profissional
-
+Reescreva o texto de forma mais natural, humana, clara e profissional.
 Mantenha a ideia original.
-
-Não explique nada.
 Responda apenas com o texto humanizado.
 `;
-
-    }
-
-    /* PLÁGIO */
-    else if (tipo === "plagio") {
-
+    } else if (tipo === "plagio") {
       promptSistema = `
-Você é um analisador de originalidade da LM TECH 93.
-
-Faça uma análise básica do texto.
-
-Verifique:
-- repetição excessiva
-- aparência de texto copiado
-- padrão muito robótico
-- baixa originalidade
-
-No final dê:
-- nível de originalidade
-- risco baixo/médio/alto
-- sugestões
-
+Você é um analisador básico de originalidade da LM TECH 93.
+Analise repetição, padrão robótico, baixa originalidade e risco de cópia.
 Não invente fontes da internet.
+Dê nível de originalidade, risco baixo/médio/alto e sugestões.
 `;
-
-    }
-
-    else {
-
+    } else {
       return res.status(400).json({
         erro: "Tipo inválido."
       });
-
     }
 
     const response = await openai.responses.create({
       model: "gpt-5.4-mini",
-      input
+      input: [
+        { role: "system", content: promptSistema },
+        { role: "user", content: textoLimpo }
+      ],
+      max_output_tokens: 800
+    });
+
+    return res.json({
+      resultado: response.output_text || "Sem resultado no momento."
+    });
+
+  } catch (error) {
+    console.error("Erro nas ferramentas de texto:", error);
+    return res.status(500).json({
+      erro: "Erro interno ao processar texto."
+    });
+  }
+});app.post("/api/text-tools", async (req, res) => {
+  try {
+    const { tipo, texto } = req.body;
+
+    if (!tipo || !texto) {
+      return res.status(400).json({
+        erro: "Texto ou tipo não enviado."
+      });
+    }
+
+    const textoLimpo = String(texto).trim();
+
+    if (textoLimpo.length < 5) {
+      return res.status(400).json({
+        erro: "Texto muito curto."
+      });
+    }
+
+    let promptSistema = "";
+
+    if (tipo === "corrigir") {
+      promptSistema = `
+Você é um corretor gramatical profissional da LM TECH 93.
+Corrija gramática, ortografia, pontuação, clareza e concordância.
+Mantenha o sentido original.
+Responda apenas com o texto corrigido.
+`;
+    } else if (tipo === "humanizar") {
+      promptSistema = `
+Você é um humanizador de texto profissional da LM TECH 93.
+Reescreva o texto de forma mais natural, humana, clara e profissional.
+Mantenha a ideia original.
+Responda apenas com o texto humanizado.
+`;
+    } else if (tipo === "plagio") {
+      promptSistema = `
+Você é um analisador básico de originalidade da LM TECH 93.
+Analise repetição, padrão robótico, baixa originalidade e risco de cópia.
+Não invente fontes da internet.
+Dê nível de originalidade, risco baixo/médio/alto e sugestões.
+`;
+    } else {
+      return res.status(400).json({
+        erro: "Tipo inválido."
+      });
+    }
+
+    const response = await openai.responses.create({
+      model: "gpt-5.4-mini",
+      input: [
+        { role: "system", content: promptSistema },
+        { role: "user", content: textoLimpo }
+      ],
+      max_output_tokens: 800
+    });
+
+    return res.json({
+      resultado: response.output_text || "Sem resultado no momento."
+    });
+
+  } catch (error) {
+    console.error("Erro nas ferramentas de texto:", error);
+    return res.status(500).json({
+      erro: "Erro interno ao processar texto."
+    });
+  }
+});
 
 const port = process.env.PORT || 3000;
 app.listen(port, () =>

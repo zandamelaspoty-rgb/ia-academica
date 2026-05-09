@@ -656,6 +656,108 @@ app.post("/api/generate-certificate", async (req, res) => {
   }
 });
 
+/* =========================================
+   FERRAMENTAS DE TEXTO LM TECH 93
+========================================= */
+
+app.post("/api/text-tools", async (req, res) => {
+  try {
+
+    const { tipo, texto } = req.body;
+
+    if (!texto || !tipo) {
+      return res.status(400).json({
+        erro: "Texto ou tipo não enviado."
+      });
+    }
+
+    const textoLimpo = String(texto).trim();
+
+    if (textoLimpo.length < 5) {
+      return res.status(400).json({
+        erro: "Texto muito curto."
+      });
+    }
+
+    let promptSistema = "";
+
+    /* CORRETOR */
+    if (tipo === "corrigir") {
+
+      promptSistema = `
+Você é um corretor gramatical profissional da LM TECH 93.
+
+Corrija:
+- gramática
+- ortografia
+- pontuação
+- clareza
+- concordância
+
+Mantenha o sentido original do texto.
+
+Responda apenas com o texto corrigido.
+`;
+
+    }
+
+    /* HUMANIZADOR */
+    else if (tipo === "humanizar") {
+
+      promptSistema = `
+Você é um humanizador de texto profissional da LM TECH 93.
+
+Reescreva o texto:
+- mais natural
+- mais humano
+- menos robótico
+- mais fluido
+- mais profissional
+
+Mantenha a ideia original.
+
+Não explique nada.
+Responda apenas com o texto humanizado.
+`;
+
+    }
+
+    /* PLÁGIO */
+    else if (tipo === "plagio") {
+
+      promptSistema = `
+Você é um analisador de originalidade da LM TECH 93.
+
+Faça uma análise básica do texto.
+
+Verifique:
+- repetição excessiva
+- aparência de texto copiado
+- padrão muito robótico
+- baixa originalidade
+
+No final dê:
+- nível de originalidade
+- risco baixo/médio/alto
+- sugestões
+
+Não invente fontes da internet.
+`;
+
+    }
+
+    else {
+
+      return res.status(400).json({
+        erro: "Tipo inválido."
+      });
+
+    }
+
+    const response = await openai.responses.create({
+      model: "gpt-5.4-mini",
+      input
+
 const port = process.env.PORT || 3000;
 app.listen(port, () =>
   console.log(`🛡️ Cyber AI LM TECH 93 online em http://localhost:${port}`)

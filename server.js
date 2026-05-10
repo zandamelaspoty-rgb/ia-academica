@@ -673,6 +673,31 @@ app.post("/api/generate-certificate", async (req, res) => {
 
 app.post("/api/text-tools", async (req, res) => {
   try {
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.replace("Bearer ", "").trim();
+
+    if (!token) {
+      return res.status(401).json({
+        erro: "Precisas entrar primeiro."
+      });
+    }
+
+    const user = await getUserFromToken(token);
+
+    if (!user) {
+      return res.status(401).json({
+        erro: "Sessão inválida."
+      });
+    }
+
+    const profile = await getProfile(user.id);
+
+    if (!profile) {
+      return res.status(404).json({
+        erro: "Perfil não encontrado."
+      });
+    }
+
     const { tipo, texto } = req.body;
 
     if (!tipo || !texto) {
@@ -686,6 +711,23 @@ app.post("/api/text-tools", async (req, res) => {
     if (textoLimpo.length < 5) {
       return res.status(400).json({
         erro: "Texto muito curto."
+      });
+    }
+
+    const isPremium =
+      profile.plan === "premium" &&
+      (!profile.premium_expires_at ||
+        new Date(profile.premium_expires_at) > new Date());
+
+    const usageToday = await getTodayUsage(user.id);
+
+    const dailyLimit = isPremium ? 20 : 3;
+
+    if (usageToday >= dailyLimit) {
+      return res.status(403).json({
+        erro: isPremium
+          ? "🔒 Atingiste o limite Premium de hoje."
+          : "🔒 Limite grátis atingido. Ative o Premium para continuar."
       });
     }
 
@@ -724,77 +766,16 @@ Dê nível de originalidade, risco baixo/médio/alto e sugestões.
         { role: "system", content: promptSistema },
         { role: "user", content: textoLimpo }
       ],
-      max_output_tokens: 800
+      max_output_tokens: isPremium ? 900 : 500
     });
+
+    await addUsage(user.id);
 
     return res.json({
-      resultado: response.output_text || "Sem resultado no momento."
-    });
-
-  } catch (error) {
-    console.error("Erro nas ferramentas de texto:", error);
-    return res.status(500).json({
-      erro: "Erro interno ao processar texto."
-    });
-  }
-});app.post("/api/text-tools", async (req, res) => {
-  try {
-    const { tipo, texto } = req.body;
-
-    if (!tipo || !texto) {
-      return res.status(400).json({
-        erro: "Texto ou tipo não enviado."
-      });
-    }
-
-    const textoLimpo = String(texto).trim();
-
-    if (textoLimpo.length < 5) {
-      return res.status(400).json({
-        erro: "Texto muito curto."
-      });
-    }
-
-    let promptSistema = "";
-
-    if (tipo === "corrigir") {
-      promptSistema = `
-Você é um corretor gramatical profissional da LM TECH 93.
-Corrija gramática, ortografia, pontuação, clareza e concordância.
-Mantenha o sentido original.
-Responda apenas com o texto corrigido.
-`;
-    } else if (tipo === "humanizar") {
-      promptSistema = `
-Você é um humanizador de texto profissional da LM TECH 93.
-Reescreva o texto de forma mais natural, humana, clara e profissional.
-Mantenha a ideia original.
-Responda apenas com o texto humanizado.
-`;
-    } else if (tipo === "plagio") {
-      promptSistema = `
-Você é um analisador básico de originalidade da LM TECH 93.
-Analise repetição, padrão robótico, baixa originalidade e risco de cópia.
-Não invente fontes da internet.
-Dê nível de originalidade, risco baixo/médio/alto e sugestões.
-`;
-    } else {
-      return res.status(400).json({
-        erro: "Tipo inválido."
-      });
-    }
-
-    const response = await openai.responses.create({
-      model: "gpt-5.4-mini",
-      input: [
-        { role: "system", content: promptSistema },
-        { role: "user", content: textoLimpo }
-      ],
-      max_output_tokens: 800
-    });
-
-    return res.json({
-      resultado: response.output_text || "Sem resultado no momento."
+      resultado: response.output_text || "Sem resultado no momento.",
+      plan: isPremium ? "premium" : "free",
+      usage_today: usageToday + 1,
+      daily_limit: dailyLimit
     });
 
   } catch (error) {

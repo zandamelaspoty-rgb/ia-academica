@@ -724,13 +724,30 @@ app.post("/api/text-tools", async (req, res) => {
     const dailyLimit = isPremium ? 20 : 3;
 
     if (usageToday >= dailyLimit) {
-      return res.status(403).json({
-        erro: isPremium
-          ? "🔒 Atingiste o limite Premium de hoje."
-          : "🔒 Limite grátis atingido. Ative o Premium para continuar."
-      });
-    }
+  return res.status(403).json({
+    erro: isPremium
+      ? "🔒 Atingiste o limite Premium de hoje."
+      : `
+🔒 Limite grátis atingido.<br><br>
 
+<a href="https://wa.me/258841234567?text=Olá%20LM%20TECH%2093,%20quero%20ativar%20o%20Premium%20das%20ferramentas%20IA"
+target="_blank"
+style="
+display:inline-block;
+padding:12px 18px;
+background:linear-gradient(135deg,#00c853,#00e676);
+color:#ffffff;
+font-weight:bold;
+text-decoration:none;
+border-radius:12px;
+font-size:15px;
+margin-top:10px;
+">
+💬 Ativar Premium no WhatsApp
+</a>
+`
+  });
+}
     let promptSistema = "";
 
     if (tipo === "corrigir") {

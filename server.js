@@ -730,7 +730,7 @@ app.post("/api/text-tools", async (req, res) => {
       : `
 🔒 Limite grátis atingido.<br><br>
 
-<a href="https://wa.me/258841234567?text=Olá%20LM%20TECH%2093,%20quero%20ativar%20o%20Premium%20das%20ferramentas%20IA"
+<a href="https://wa.me/258861532479?text=Olá%20LM%20TECH%2093,%20quero%20ativar%20o%20Premium%20das%20ferramentas%20IA"
 target="_blank"
 style="
 display:inline-block;
